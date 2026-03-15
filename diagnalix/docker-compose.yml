@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: diagnalix_db
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=diagnalix_db
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+    networks:
+      - diagnalix_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: diagnalix_redis
+    networks:
+      - diagnalix_net
+
+  backend:
+    build: ./backend
+    container_name: diagnalix_django
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      - DATABASE_URL=postgres://admin:password123@db:5432/diagnalix_db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    networks:
+      - diagnalix_net
+
+  node_api:
+    build: ./node_api
+    container_name: diagnalix_node
+    volumes:
+      - ./node_api:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - diagnalix_net
+
+networks:
+  diagnalix_net:
+    driver: bridge
