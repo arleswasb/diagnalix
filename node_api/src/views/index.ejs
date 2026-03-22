@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnalix - protocolos medicos interativos</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-screen overflow-hidden flex flex-col bg-white text-gray-900">
+
+    <header class="bg-primary text-white shadow-md z-10">
+        <div class="px-4 py-3 border-b border-white/20">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-white/20 border border-white/40 flex items-center justify-center font-bold text-sm">
+                    DX
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-extrabold tracking-wide">DIAGNALIX</h1>
+                    <p class="text-xs md:text-sm text-white/90">Protocolos médicos interativos</p>
+                </div>
+                </div>
+
+                <div class="badge <%= backendOnline ? 'badge-success' : 'badge-error' %> badge-outline gap-2 text-white border-white/40">
+                    <span class="w-2 h-2 rounded-full <%= backendOnline ? 'bg-green-300' : 'bg-red-300' %>"></span>
+                    <%= backendOnline ? 'Backend Online' : 'Backend Offline' %>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex pl-[18rem] pr-4 py-2 gap-2 overflow-x-auto no-scrollbar" id="cards-header">
+            <% if (cards && cards.length > 0) { %>
+                <% cards.forEach((card, index) => { %>
+                    <button
+                        onclick="selectCard(<%= index %>)"
+                        class="btn btn-ghost btn-sm whitespace-nowrap <%= index === 0 ? 'btn-active bg-white/20' : '' %>">
+                        <%= card.title %>
+                    </button>
+                <% }); %>
+            <% } %>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <aside class="w-72 bg-base-200 border-r border-base-300 overflow-y-auto">
+            <ul class="menu p-4 w-full text-base-content" id="sidebar-menu"></ul>
+        </aside>
+
+        <main class="flex-1 p-6 overflow-y-auto bg-white" id="main-content">
+            <% if (!cards || cards.length === 0) { %>
+                <div class="alert alert-warning">
+                    <span>Nenhum cartão médico encontrado.</span>
+                </div>
+            <% } %>
+        </main>
+    </div>
+
+    <script>
+        const allCards = <%- JSON.stringify(cards || []) %>;
+
+        function shortTopicTitle(task) {
+            if (!task) return 'Tópico';
+            const normalized = task.replace(/\s+/g, ' ').trim();
+            const firstPart = normalized.split(/[\-:()]/)[0].trim();
+            const base = firstPart.length >= 8 ? firstPart : normalized;
+            return base.length > 42 ? `${base.substring(0, 42)}...` : base;
+        }
+
+        function selectCard(index) {
+            const card = allCards[index];
+            if (!card) {
+                return;
+            }
+
+            const buttons = document.querySelectorAll('#cards-header button');
+            buttons.forEach((button, buttonIndex) => {
+                button.classList.toggle('btn-active', buttonIndex === index);
+                button.classList.toggle('bg-white/20', buttonIndex === index);
+            });
+
+            const contentArea = document.getElementById('main-content');
+            const sidebar = document.getElementById('sidebar-menu');
+            const totalTopics = (card.items || []).length;
+
+            sidebar.innerHTML = `
+                <li class="menu-title"><span>Tópicos do Cartão</span></li>
+                ${(card.items || []).map((item, itemIndex) => `
+                    <li>
+                        <a href="#item-${itemIndex}" class="topic-link ${itemIndex === 0 ? 'topic-link-active' : ''}" title="${item.task}" onclick="setActiveTopic(event)">
+                            <span class="font-semibold mr-2">${itemIndex + 1}.</span>
+                            ${shortTopicTitle(item.task)}
+                        </a>
+                    </li>
+                `).join('')}
+            `;
+
+            contentArea.innerHTML = `
+                <div class="max-w-5xl mx-auto">
+                    <div class="rounded-xl overflow-hidden mb-6 shadow">
+                        <img
+                            src="${card.image_url || 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=1600&auto=format&fit=crop'}"
+                            alt="${card.title}"
+                            class="w-full h-56 md:h-72 object-cover"
+                        />
+                    </div>
+
+                    <div class="badge badge-primary mb-2">${card.category && card.category.name ? card.category.name : 'Sem categoria'}</div>
+                    <h1 class="text-3xl font-bold mb-3">${card.title}</h1>
+                    <p class="text-gray-600 mb-4">${card.description || ''}</p>
+                    <div class="text-sm text-gray-500 mb-8">${totalTopics} tópicos neste protocolo</div>
+
+                    <div class="space-y-4">
+                        ${(card.items || []).map((item, itemIndex) => `
+                            <div id="item-${itemIndex}" class="card bg-base-100 shadow-sm border border-base-200 p-4">
+                                <div class="flex items-start gap-4">
+                                    <input type="checkbox" class="checkbox checkbox-primary mt-1" />
+                                    <div>
+                                        <div class="text-xs uppercase tracking-wide text-primary font-semibold mb-1">Tópico ${itemIndex + 1}</div>
+                                        <span class="text-lg">${item.task}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function setActiveTopic(event) {
+            const sidebar = document.getElementById('sidebar-menu');
+            const links = sidebar.querySelectorAll('.topic-link');
+            links.forEach(link => link.classList.remove('topic-link-active'));
+            event.currentTarget.classList.add('topic-link-active');
+        }
+
+        if (allCards.length > 0) {
+            selectCard(0);
+        }
+    </script>
+
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .topic-link {
+            border-radius: 0.5rem;
+        }
+
+        .topic-link-active {
+            background-color: rgb(219 234 254) !important;
+            color: rgb(30 64 175) !important;
+            font-weight: 600;
+        }
+
+        .topic-link:hover {
+            background-color: rgb(239 246 255);
+        }
+    </style>
+</body>
+</html>

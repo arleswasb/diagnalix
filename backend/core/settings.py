@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure--)7-=%046$&92^398=1wljlrfke(4hb&^qvre93gp+2wjuxh^^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'backend', 'diagnalix_django', '0.0.0.0']
 
 
 # Application definition
@@ -78,8 +78,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'diagnalix_db',
-        'USER': 'admin',
-        'PASSWORD': 'password123',
+        'USER': 'arleswasb',
+        'PASSWORD': '300399',
         'HOST': 'db',
         'PORT': '5432',
     }
