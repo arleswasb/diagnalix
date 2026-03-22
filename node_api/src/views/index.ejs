@@ -9,11 +9,12 @@
 </head>
 <body class="h-screen overflow-hidden flex flex-col bg-white text-gray-900">
 
-    <header class="bg-primary text-white shadow-md z-10">
+
+    <header class="bg-primary text-white shadow-lg z-10">
         <div class="px-4 py-3 border-b border-white/20">
             <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-white/20 border border-white/40 flex items-center justify-center font-bold text-sm">
+                <div class="w-12 h-12 rounded-full bg-white/30 border border-white/40 flex items-center justify-center font-bold text-lg shadow-md">
                     DX
                 </div>
                 <div>
@@ -22,20 +23,20 @@
                 </div>
                 </div>
 
-                <div class="badge <%= backendOnline ? 'badge-success' : 'badge-error' %> badge-outline gap-2 text-white border-white/40">
+                <div class="badge <%= backendOnline ? 'badge-success' : 'badge-error' %> badge-outline gap-2 text-white border-white/40 shadow">
                     <span class="w-2 h-2 rounded-full <%= backendOnline ? 'bg-green-300' : 'bg-red-300' %>"></span>
                     <%= backendOnline ? 'Backend Online' : 'Backend Offline' %>
                 </div>
             </div>
         </div>
 
-        <div class="flex pl-[18rem] pr-4 py-2 gap-2 overflow-x-auto no-scrollbar" id="cards-header">
+        <div class="flex pl-[21rem] pr-4 py-2 gap-2 overflow-x-auto no-scrollbar" id="cards-header">
             <% if (cards && cards.length > 0) { %>
                 <% cards.forEach((card, index) => { %>
                     <button
                         onclick="selectCard(<%= index %>)"
-                        class="btn btn-ghost btn-sm whitespace-nowrap <%= index === 0 ? 'btn-active bg-white/20' : '' %>">
-                        <%= card.title %>
+                        class="btn btn-ghost btn-sm whitespace-nowrap rounded-xl shadow transition <%= index === 0 ? 'btn-active bg-white/20' : '' %>">
+                        Card-<%= index + 1 %>
                     </button>
                 <% }); %>
             <% } %>
@@ -43,13 +44,13 @@
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        <aside class="w-72 bg-base-200 border-r border-base-300 overflow-y-auto">
+        <aside class="w-72 bg-base-200 border-r border-base-300 overflow-y-auto rounded-xl m-4 shadow-lg">
             <ul class="menu p-4 w-full text-base-content" id="sidebar-menu"></ul>
         </aside>
 
-        <main class="flex-1 p-6 overflow-y-auto bg-white" id="main-content">
+        <main class="flex-1 p-6 overflow-y-auto bg-white rounded-xl m-4 shadow-lg" id="main-content">
             <% if (!cards || cards.length === 0) { %>
-                <div class="alert alert-warning">
+                <div class="alert alert-warning rounded-xl shadow">
                     <span>Nenhum cartão médico encontrado.</span>
                 </div>
             <% } %>
@@ -97,7 +98,7 @@
 
             contentArea.innerHTML = `
                 <div class="max-w-5xl mx-auto">
-                    <div class="rounded-xl overflow-hidden mb-6 shadow">
+                    <div class="rounded-2xl overflow-hidden mb-6 shadow-xl border border-base-200">
                         <img
                             src="${card.image_url || 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=1600&auto=format&fit=crop'}"
                             alt="${card.title}"
@@ -105,14 +106,14 @@
                         />
                     </div>
 
-                    <div class="badge badge-primary mb-2">${card.category && card.category.name ? card.category.name : 'Sem categoria'}</div>
+                    <div class="badge badge-primary mb-2 shadow">${card.category && card.category.name ? card.category.name : 'Sem categoria'}</div>
                     <h1 class="text-3xl font-bold mb-3">${card.title}</h1>
                     <p class="text-gray-600 mb-4">${card.description || ''}</p>
                     <div class="text-sm text-gray-500 mb-8">${totalTopics} tópicos neste protocolo</div>
 
                     <div class="space-y-4">
                         ${(card.items || []).map((item, itemIndex) => `
-                            <div id="item-${itemIndex}" class="card bg-base-100 shadow-sm border border-base-200 p-4">
+                            <div id="item-${itemIndex}" class="card bg-base-100 shadow-lg border border-base-200 p-4 rounded-xl transition">
                                 <div class="flex items-start gap-4">
                                     <input type="checkbox" class="checkbox checkbox-primary mt-1" />
                                     <div>
@@ -144,17 +145,21 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .topic-link {
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.06);
+            transition: box-shadow 0.2s, background 0.2s;
         }
 
         .topic-link-active {
             background-color: rgb(219 234 254) !important;
             color: rgb(30 64 175) !important;
             font-weight: 600;
+            box-shadow: 0 2px 8px 0 rgb(30 64 175 / 0.10);
         }
 
         .topic-link:hover {
             background-color: rgb(239 246 255);
+            box-shadow: 0 2px 8px 0 rgb(30 64 175 / 0.10);
         }
     </style>
 </body>
